@@ -196,3 +196,19 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy"}
+
+
+# Pagination helper
+@app.get("/api/v1/users/paginated", response_model=dict, tags=["Users"])
+async def list_users_paginated(
+    page: int = 1,
+    per_page: int = 10,
+    db: AsyncSession = Depends(get_db)
+):
+    repo = UserRepository(db)
+    users = await repo.get_all(skip=(page - 1) * per_page, limit=per_page)
+    return {
+        "data": [UserResponse.model_validate(u) for u in users],
+        "page": page,
+        "per_page": per_page,
+    }
