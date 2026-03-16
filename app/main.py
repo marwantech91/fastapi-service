@@ -195,7 +195,18 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
 
 @app.get("/health", tags=["Health"])
 async def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+
+
+@app.get("/api/v1/users/search", response_model=list[UserResponse], tags=["Users"])
+async def search_users(
+    q: str,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(User).where(User.name.ilike(f"%{q}%"))
+    )
+    return list(result.scalars().all())
 
 
 # Pagination helper
