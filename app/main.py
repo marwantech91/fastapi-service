@@ -134,6 +134,11 @@ class UserRepository:
     async def delete(self, user: User) -> None:
         await self.db.delete(user)
 
+    async def count(self) -> int:
+        from sqlalchemy import func
+        result = await self.db.execute(select(func.count(User.id)))
+        return result.scalar_one()
+
 
 # Endpoints
 @app.get("/api/v1/users", response_model=list[UserResponse], tags=["Users"])
