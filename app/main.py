@@ -139,6 +139,12 @@ class UserRepository:
         result = await self.db.execute(select(func.count(User.id)))
         return result.scalar_one()
 
+    async def get_active(self, skip: int = 0, limit: int = 100) -> list[User]:
+        result = await self.db.execute(
+            select(User).where(User.is_active == True).offset(skip).limit(limit)
+        )
+        return list(result.scalars().all())
+
 
 # Endpoints
 @app.get("/api/v1/users", response_model=list[UserResponse], tags=["Users"])
