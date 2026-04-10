@@ -209,6 +209,19 @@ async def health_check():
     return {"status": "healthy", "version": app.version, "timestamp": datetime.utcnow().isoformat()}
 
 
+@app.get("/api/v1/users/stats", tags=["Users"])
+async def user_stats(db: AsyncSession = Depends(get_db)):
+    """Get aggregate user statistics."""
+    repo = UserRepository(db)
+    total = await repo.count()
+    active = await repo.get_active()
+    return {
+        "total_users": total,
+        "active_users": len(active),
+        "inactive_users": total - len(active),
+    }
+
+
 @app.get("/api/v1/users/search", response_model=list[UserResponse], tags=["Users"])
 async def search_users(
     q: str,
